@@ -113,6 +113,48 @@ public:
 		this->type = JSON_NULL;
 	}
 
+	stringstream& json_escape(stringstream &ss,const char* str,int len)
+	{
+		int i;
+		for(i=0;i<len;++i)
+		{
+			switch(str[i])
+			{
+				case '\"': ss<<"\\\"";continue;
+				case '\\': ss<<"\\\\";continue;
+				case '/' : ss<<"\\/";continue;
+			}
+			if(' '<= str[i] && str[i]<='~')
+			{
+				ss<<str[i];
+			}
+			else if( ((unsigned char)str[i])>=0X80)
+			{
+				ss<<"\\u"<<setw(4)<<setfill('0')
+					<<setiosflags(ios::right)<<hex 
+					<<*(short*)(str+i);
+				++i;
+			}
+			else
+			{
+				switch(str[i])
+				{
+					case '\t': ss<<"\\t";break;
+					case '\b': ss<<"\\b";break;
+					case '\f': ss<<"\\f";break;
+					case '\n': ss<<"\\n";break;
+					case '\r': ss<<"\\r";break;
+					default:
+							   ss<<"\\u"<<setw(2)<<setfill('0')
+								   <<setiosflags(ios::right)<<hex 
+								   <<(int)str[i];
+							   break;
+				}
+			}
+		}
+		return ss;
+	}
+
 	stringstream& serialization(stringstream &ss)
 	{
 		switch(this->type)
@@ -134,7 +176,7 @@ public:
 				break;
 
 			case JSON_STRING:
-				//Todo
+				this->json_escape(ss,this->data.data(),this->data.size());
 				break;
 
 			case JSON_OBJECT:
