@@ -60,6 +60,7 @@ public:
 		if(str==NULL)
 		{
 			this->type = JSON_NULL;
+			return;
 		}
 
 		this->type = JSON_STRING;
