@@ -136,6 +136,20 @@ public:
 		return *this;
 	}
 
+	//array size
+	int size()
+	{
+		if(this->type == JSON_ARRAY)
+		{
+			return this->array.size();
+		}
+		if(this->type == JSON_OBJECT)
+		{
+			return this->key_value.size();
+		}
+		return 0;
+	}
+
 	//clean
 	void clear()
 	{
