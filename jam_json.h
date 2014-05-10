@@ -138,7 +138,11 @@ public:
 		this->key_value[key] = o;
 		return *this;
 	}
-
+	//map
+	const map<string,jam_json>& hashmap()
+	{
+		return this->key_value;
+	}
 	//array size
 	int size()
 	{
