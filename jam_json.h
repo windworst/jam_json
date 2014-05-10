@@ -26,9 +26,9 @@ public:
 		JSON_BYTES,
 	};
 public:
-	jam_json(const char* str = NULL)
+	jam_json(const char* str = NULL,int len = 0)
 	{
-		this->set_value(str);
+		this->set_value(str,len);
 	}
 	jam_json(const jam_json& o)
 	{
@@ -55,7 +55,7 @@ public:
 
 public:
 	//set value: string/null
-	void set_value(const char* str)
+	void set_value(const char* str,int len = 0)
 	{
 		if(str==NULL)
 		{
@@ -64,9 +64,9 @@ public:
 		}
 
 		this->type = JSON_STRING;
-		int len = strlen(str);
-		this->data.resize(len+1);
-		memcpy(this->data.data(),str,len+1);
+		len ==0 ? len = strlen(str)+1:0;
+		this->data.resize(len);
+		memcpy(this->data.data(),str,len);
 	}
 
 	//set value: number
