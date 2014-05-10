@@ -1,13 +1,11 @@
+#pragma once
 #include <string.h>
 #include <string>
 #include <map>
-#include <pair>
 #include <vector>
-#include <stringstream>
-using std::vector;
-using std::map;
-using std::pair;
-using std::string;
+#include <iomanip>
+#include <sstream>
+using namespace std;
 
 typedef double json_number;
 
@@ -29,6 +27,10 @@ public:
 	jam_json(const char* str = NULL,int len = 0)
 	{
 		this->set_value(str,len);
+	}
+	jam_json(const vector<char>& data)
+	{
+		this->set_value(data);
 	}
 	jam_json(const jam_json& o)
 	{
@@ -64,9 +66,10 @@ public:
 		}
 
 		this->type = JSON_STRING;
-		len ==0 ? len = strlen(str)+1:0;
-		this->data.resize(len);
+		len ==0 ? len = strlen(str):0;
+		this->data.resize(len+1);
 		memcpy(this->data.data(),str,len);
+		this->data[len] = '\0';
 	}
 
 	//set value: number
@@ -77,10 +80,22 @@ public:
 		(*(json_number*)this->data.data()) = number;
 	}
 
+	//set value: data
+	void set_value(const vector<char>& data)
+	{
+		this->type = JSON_BYTES;
+		this->data = data;
+	}
+
 	//set value: object
 	void set_value(const jam_json& o)
 	{
-		*this = o;
+		if(this==&o)return;
+
+		this->type = o.type;
+		this->data = o.data;
+		this->array = o.array;
+		this->key_value = o.key_value;
 	}
 
 	//set value: 
@@ -98,7 +113,7 @@ public:
 	}
 
 	//add item
-	jam_json& add(cosnt char* key,const jam_json& o)
+	jam_json& add(const char* key,const jam_json& o)
 	{
 		this->type = JSON_OBJECT;
 		this->key_value[key] = o;
@@ -112,6 +127,19 @@ public:
 		this->data.clear();
 		this->array.clear();
 		this->type = JSON_NULL;
+	}
+
+	//serialization
+	string serialization()
+	{
+		stringstream ss;
+		return this->serialization(ss).str();
+	}
+
+	//type
+	int json_type()
+	{
+		return this->type;
 	}
 
 	stringstream& json_escape(stringstream &ss,const char* str,int len)
@@ -177,7 +205,9 @@ public:
 				break;
 
 			case JSON_STRING:
-				this->json_escape(ss,this->data.data(),this->data.size());
+				ss<<"\"";
+				this->json_escape(ss,this->data.data(),this->data.size()-1);
+				ss<<"\"";
 				break;
 
 			case JSON_OBJECT:
@@ -192,10 +222,10 @@ public:
 						}
 
 						ss<<"\""<<it->first<<"\":";
-						it->second->serialization(ss);
+						it->second.serialization(ss);
 						++it;
 					}
-					ss<<"}"
+					ss<<"}";
 				}
 				break;
 			case JSON_ARRAY:
@@ -209,12 +239,24 @@ public:
 							ss<<",";
 						}
 
-						it->second->serialization(ss);
+						it->serialization(ss);
 						++it;
 					}
 					ss<<"]";
 				}
 				break;
+			case JSON_BYTES:
+				{
+					ss<<"b"<<this->data.size()<<"\"";
+					int i;
+					for(i=0;i<this->data.size();++i)
+					{
+						ss<<this->data[i];
+					}
+					ss<<"\"";
+				}
+				break;
+			default:break;
 		}
 		return ss;
 	}
@@ -224,4 +266,4 @@ private:
 	vector <char> data;
 	vector <jam_json> array; 
 	int type;
-}
+};

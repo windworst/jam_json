@@ -1,0 +1,13 @@
+In file included from test_main.cpp:1:0:
+jam_json.h:111:15: error: 'cosnt' has not been declared
+  void additem(cosnt char* key,const jam_json& o)
+               ^
+jam_json.h:111:27: error: two or more data types in declaration of 'key'
+  void additem(cosnt char* key,const jam_json& o)
+                           ^
+jam_json.h:111:30: error: expected ')' before ',' token
+  void additem(cosnt char* key,const jam_json& o)
+                              ^
+jam_json.h:111:31: error: expected unqualified-id before 'const'
+  void additem(cosnt char* key,const jam_json& o)
+                               ^
