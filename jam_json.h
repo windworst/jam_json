@@ -60,7 +60,7 @@ public:
 
 	jam_json& operator[](const char* key)
 	{
-		this->type = JSON_OBJECT;
+		this->j_type = JSON_OBJECT;
 		return this->key_value[key];
 	}
 
@@ -80,11 +80,11 @@ public:
 	{
 		if(str==NULL)
 		{
-			this->type = JSON_NULL;
+			this->j_type = JSON_NULL;
 			return;
 		}
 
-		this->type = JSON_STRING;
+		this->j_type = JSON_STRING;
 		len ==0 ? len = strlen(str):0;
 		this->data.resize(len+1);
 		memcpy(this->data.data(),str,len);
@@ -94,7 +94,7 @@ public:
 	//set value: number
 	void set_value(json_number number)
 	{
-		this->type = JSON_NUMBER;
+		this->j_type = JSON_NUMBER;
 		this->data.resize(sizeof(json_number));
 		(*(json_number*)this->data.data()) = number;
 	}
@@ -102,7 +102,7 @@ public:
 	//set value: data
 	void set_value(const vector<char>& data)
 	{
-		this->type = JSON_BYTES;
+		this->j_type = JSON_BYTES;
 		this->data = data;
 	}
 
@@ -111,7 +111,7 @@ public:
 	{
 		if(this==&o)return;
 
-		this->type = o.type;
+		this->j_type = o.j_type;
 		this->data = o.data;
 		this->array = o.array;
 		this->key_value = o.key_value;
@@ -120,13 +120,13 @@ public:
 	//set value: 
 	void set_value(bool bool_value)
 	{
-		this->type = bool_value ? JSON_TRUE : JSON_FALSE;
+		this->j_type = bool_value ? JSON_TRUE : JSON_FALSE;
 	}
 
 	//add object to itself
 	jam_json& add(const jam_json& o)
 	{
-		this->type = JSON_ARRAY;
+		this->j_type = JSON_ARRAY;
 		this->array.push_back(o);
 		return *this;
 	}
@@ -134,23 +134,23 @@ public:
 	//add item
 	jam_json& add(const char* key,const jam_json& o)
 	{
-		this->type = JSON_OBJECT;
+		this->j_type = JSON_OBJECT;
 		this->key_value[key] = o;
 		return *this;
 	}
 	//map
-	const map<string,jam_json>& hashmap()
+	const map<string,jam_json>& keyvalue()
 	{
 		return this->key_value;
 	}
 	//array size
 	int size()
 	{
-		if(this->type == JSON_ARRAY)
+		if(this->j_type == JSON_ARRAY)
 		{
 			return this->array.size();
 		}
-		if(this->type == JSON_OBJECT)
+		if(this->j_type == JSON_OBJECT)
 		{
 			return this->key_value.size();
 		}
@@ -163,7 +163,7 @@ public:
 		this->key_value.clear();
 		this->data.clear();
 		this->array.clear();
-		this->type = JSON_NULL;
+		this->j_type = JSON_NULL;
 	}
 
 	//serialization
@@ -174,9 +174,9 @@ public:
 	}
 
 	//type
-	int json_type()
+	int type()
 	{
-		return this->type;
+		return this->j_type;
 	}
 
 	stringstream& json_escape(stringstream &ss,const char* str,int len)
@@ -223,7 +223,7 @@ public:
 
 	stringstream& serialization(stringstream &ss)
 	{
-		switch(this->type)
+		switch(this->j_type)
 		{
 			case JSON_NULL: 
 				ss<< "NULL";
@@ -302,5 +302,5 @@ private:
 	map<string,jam_json> key_value;
 	vector <char> data;
 	vector <jam_json> array; 
-	int type;
+	int j_type;
 };
