@@ -149,7 +149,7 @@ public:
 		return *this;
 	}
 
-	//add item
+	//add key-value item
 	jam_json& add(const char* key,const jam_json& o)
 	{
 		this->j_type = JSON_OBJECT;
@@ -184,6 +184,12 @@ public:
 		this->j_type = JSON_NULL;
 	}
 
+	//type
+	int type()
+	{
+		return this->j_type;
+	}
+
 	//serialization
 	string serialization()
 	{
@@ -192,12 +198,20 @@ public:
 		return ss.str();
 	}
 
-	//type
-	int type()
+	//unserialization
+	static jam_json unserialization(const char* str,int len = 0 )
 	{
-		return this->j_type;
+		stringstream ss;
+		jam_json jj;
+		if(str!=NULL)
+		{
+			ss.write(str,len==0?strlen(str):len);
+			jj.unserialization(ss);
+		}
+		return jj;
 	}
 
+	//string to json-string
 	ostream& json_escape(ostream &ss,const char* str,int len)
 	{
 		int i;
@@ -240,81 +254,82 @@ public:
 		return ss;
 	}
 
-	ostream& serialization(ostream &ss)
+	ostream& serialization(ostream &os)
 	{
 		switch(this->j_type)
 		{
 			case JSON_NULL: 
-				ss<< "NULL";
+				os<< "NULL";
 				break;
 
 			case JSON_TRUE: 
-				ss<< "true";
+				os<< "true";
 				break;
 
 			case JSON_FALSE: 
-				ss<< "false";
+				os<< "false";
 				break;
 
 			case JSON_NUMBER:
-				ss<<(*(json_number*)this->j_data.data());
+				os<<(*(json_number*)this->j_data.data());
 				break;
 
 			case JSON_STRING:
-				ss<<"\"";
-				this->json_escape(ss,this->j_data.data(),this->j_data.size()-1);
-				ss<<"\"";
+				os<<"\"";
+				this->json_escape(os,this->j_data.data(),this->j_data.size()-1);
+				os<<"\"";
 				break;
 
 			case JSON_OBJECT:
 				{
 					map<string,jam_json>::iterator it =this->key_value.begin();
-					ss<<"{";
+					os<<"{";
 					while(it!=this->key_value.end())
 					{
 						if(it!=this->key_value.begin())
 						{
-							ss<<",";
+							os<<",";
 						}
 
-						ss<<"\""<<it->first<<"\":";
-						it->second.serialization(ss);
+						os<<"\""<<it->first<<"\":";
+						it->second.serialization(os);
 						++it;
 					}
-					ss<<"}";
+					os<<"}";
 				}
 				break;
 			case JSON_ARRAY:
 				{
 					vector <jam_json>::iterator it = this->j_array.begin();
-					ss<<"[";
+					os<<"[";
 					while(it!=this->j_array.end())
 					{
 						if(it!=this->j_array.begin())
 						{
-							ss<<",";
+							os<<",";
 						}
 
-						it->serialization(ss);
+						it->serialization(os);
 						++it;
 					}
-					ss<<"]";
+					os<<"]";
 				}
 				break;
 			case JSON_BYTES:
 				{
-					ss<<"b"<<this->j_data.size()<<"\"";
-					int i;
-					for(i=0;i<this->j_data.size();++i)
-					{
-						ss<<this->j_data[i];
-					}
-					ss<<"\"";
+					os<<"b"<<this->j_data.size()<<"\"";
+					os.write(this->j_data.data(),this->j_data.size());
+					os<<"\"";
 				}
 				break;
 			default:break;
 		}
-		return ss;
+		return os;
+	}
+
+	istream& unserialization(istream& is)
+	{
+		return is;
 	}
 
 private:
