@@ -29,9 +29,9 @@ public:
 	{
 		this->set_value(str,len);
 	}
-	jam_json(const vector<char>& data)
+	jam_json(const vector<char>& j_data)
 	{
-		this->set_value(data);
+		this->set_value(j_data);
 	}
 	jam_json(const jam_json& o)
 	{
@@ -66,7 +66,7 @@ public:
 
 	jam_json& operator[](int index)
 	{
-		return this->array.at(index);
+		return this->j_array.at(index);
 	}
 
 	jam_json& operator<<(const jam_json& o)
@@ -75,6 +75,24 @@ public:
 	}
 
 public:
+	const char* to_str()
+	{
+		if(this->j_type != JSON_STRING)return NULL;
+		return this->j_data.data();
+	}
+	json_number to_number()
+	{
+		if(this->j_type != JSON_NUMBER)return 0;
+		return *(json_number*)this->j_data.data();
+	}
+	bool to_bool()
+	{
+		return this->j_type==JSON_TRUE;
+	}
+	const vector<char>& data()
+	{
+		return this->j_data;
+	}
 	//set value: string/null
 	void set_value(const char* str,int len = 0)
 	{
@@ -86,24 +104,24 @@ public:
 
 		this->j_type = JSON_STRING;
 		len ==0 ? len = strlen(str):0;
-		this->data.resize(len+1);
-		memcpy(this->data.data(),str,len);
-		this->data[len] = '\0';
+		this->j_data.resize(len+1);
+		memcpy(this->j_data.data(),str,len);
+		this->j_data[len] = '\0';
 	}
 
 	//set value: number
 	void set_value(json_number number)
 	{
 		this->j_type = JSON_NUMBER;
-		this->data.resize(sizeof(json_number));
-		(*(json_number*)this->data.data()) = number;
+		this->j_data.resize(sizeof(json_number));
+		(*(json_number*)this->j_data.data()) = number;
 	}
 
-	//set value: data
-	void set_value(const vector<char>& data)
+	//set value: j_data
+	void set_value(const vector<char>& j_data)
 	{
 		this->j_type = JSON_BYTES;
-		this->data = data;
+		this->j_data = j_data;
 	}
 
 	//set value: object
@@ -112,8 +130,8 @@ public:
 		if(this==&o)return;
 
 		this->j_type = o.j_type;
-		this->data = o.data;
-		this->array = o.array;
+		this->j_data = o.j_data;
+		this->j_array = o.j_array;
 		this->key_value = o.key_value;
 	}
 
@@ -127,7 +145,7 @@ public:
 	jam_json& add(const jam_json& o)
 	{
 		this->j_type = JSON_ARRAY;
-		this->array.push_back(o);
+		this->j_array.push_back(o);
 		return *this;
 	}
 
@@ -143,12 +161,12 @@ public:
 	{
 		return this->key_value;
 	}
-	//array size
+	//j_array size
 	int size()
 	{
 		if(this->j_type == JSON_ARRAY)
 		{
-			return this->array.size();
+			return this->j_array.size();
 		}
 		if(this->j_type == JSON_OBJECT)
 		{
@@ -161,8 +179,8 @@ public:
 	void clear()
 	{
 		this->key_value.clear();
-		this->data.clear();
-		this->array.clear();
+		this->j_data.clear();
+		this->j_array.clear();
 		this->j_type = JSON_NULL;
 	}
 
@@ -170,7 +188,8 @@ public:
 	string serialization()
 	{
 		stringstream ss;
-		return this->serialization(ss).str();
+		this->serialization(ss);
+		return ss.str();
 	}
 
 	//type
@@ -179,7 +198,7 @@ public:
 		return this->j_type;
 	}
 
-	stringstream& json_escape(stringstream &ss,const char* str,int len)
+	ostream& json_escape(ostream &ss,const char* str,int len)
 	{
 		int i;
 		for(i=0;i<len;++i)
@@ -221,7 +240,7 @@ public:
 		return ss;
 	}
 
-	stringstream& serialization(stringstream &ss)
+	ostream& serialization(ostream &ss)
 	{
 		switch(this->j_type)
 		{
@@ -238,12 +257,12 @@ public:
 				break;
 
 			case JSON_NUMBER:
-				ss<<(*(json_number*)this->data.data());
+				ss<<(*(json_number*)this->j_data.data());
 				break;
 
 			case JSON_STRING:
 				ss<<"\"";
-				this->json_escape(ss,this->data.data(),this->data.size()-1);
+				this->json_escape(ss,this->j_data.data(),this->j_data.size()-1);
 				ss<<"\"";
 				break;
 
@@ -267,11 +286,11 @@ public:
 				break;
 			case JSON_ARRAY:
 				{
-					vector <jam_json>::iterator it = this->array.begin();
+					vector <jam_json>::iterator it = this->j_array.begin();
 					ss<<"[";
-					while(it!=this->array.end())
+					while(it!=this->j_array.end())
 					{
-						if(it!=this->array.begin())
+						if(it!=this->j_array.begin())
 						{
 							ss<<",";
 						}
@@ -284,11 +303,11 @@ public:
 				break;
 			case JSON_BYTES:
 				{
-					ss<<"b"<<this->data.size()<<"\"";
+					ss<<"b"<<this->j_data.size()<<"\"";
 					int i;
-					for(i=0;i<this->data.size();++i)
+					for(i=0;i<this->j_data.size();++i)
 					{
-						ss<<this->data[i];
+						ss<<this->j_data[i];
 					}
 					ss<<"\"";
 				}
@@ -300,7 +319,7 @@ public:
 
 private:
 	map<string,jam_json> key_value;
-	vector <char> data;
-	vector <jam_json> array; 
+	vector <char> j_data;
+	vector <jam_json> j_array; 
 	int j_type;
 };
