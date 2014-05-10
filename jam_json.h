@@ -212,24 +212,24 @@ public:
 	}
 
 	//string to json-string
-	ostream& json_escape(ostream &ss,const char* str,int len)
+	ostream& json_escape(ostream &os,const char* str,int len)
 	{
 		int i;
 		for(i=0;i<len;++i)
 		{
 			switch(str[i])
 			{
-				case '\"': ss<<"\\\"";continue;
-				case '\\': ss<<"\\\\";continue;
-				case '/' : ss<<"\\/";continue;
+				case '\"': os<<"\\\"";continue;
+				case '\\': os<<"\\\\";continue;
+				case '/' : os<<"\\/";continue;
 			}
 			if(' '<= str[i] && str[i]<='~')
 			{
-				ss<<str[i];
+				os<<str[i];
 			}
 			else if( ((unsigned char)str[i])>=0X80)
 			{
-				ss<<"\\u"<<setw(4)<<setfill('0')
+				os<<"\\u"<<setw(4)<<setfill('0')
 					<<setiosflags(ios::right)<<hex 
 					<<*(short*)(str+i);
 				++i;
@@ -238,20 +238,20 @@ public:
 			{
 				switch(str[i])
 				{
-					case '\t': ss<<"\\t";break;
-					case '\b': ss<<"\\b";break;
-					case '\f': ss<<"\\f";break;
-					case '\n': ss<<"\\n";break;
-					case '\r': ss<<"\\r";break;
+					case '\t': os<<"\\t";break;
+					case '\b': os<<"\\b";break;
+					case '\f': os<<"\\f";break;
+					case '\n': os<<"\\n";break;
+					case '\r': os<<"\\r";break;
 					default:
-							   ss<<"\\u"<<setw(2)<<setfill('0')
+							   os<<"\\u"<<setw(2)<<setfill('0')
 								   <<setiosflags(ios::right)<<hex 
 								   <<(int)str[i];
 							   break;
 				}
 			}
 		}
-		return ss;
+		return os;
 	}
 
 	ostream& serialization(ostream &os)
