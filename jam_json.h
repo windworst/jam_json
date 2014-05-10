@@ -51,6 +51,22 @@ public:
 		return *this;
 	}
 
+	jam_json& operator[](const char* key)
+	{
+		this->type = JSON_OBJECT;
+		return this->key_value[key];
+	}
+
+	jam_json& operator[](int index)
+	{
+		return this->array.at(index);
+	}
+
+	jam_json& operator<<(const jam_json& o)
+	{
+		return this->add(o);
+	}
+
 	~jam_json()
 	{
 	}
