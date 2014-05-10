@@ -24,6 +24,7 @@ public:
 		JSON_BYTES,
 	};
 public:
+	//construct and destruct
 	jam_json(const char* str = NULL,int len = 0)
 	{
 		this->set_value(str,len);
@@ -45,6 +46,12 @@ public:
 		this->set_value(bool_value);
 	}
 	
+	~jam_json()
+	{
+	}
+
+public:
+	//operator
 	jam_json& operator=(const jam_json& o)
 	{
 		this->set_value(o);
@@ -65,10 +72,6 @@ public:
 	jam_json& operator<<(const jam_json& o)
 	{
 		return this->add(o);
-	}
-
-	~jam_json()
-	{
 	}
 
 public:
