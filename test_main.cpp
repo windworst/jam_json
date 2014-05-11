@@ -14,6 +14,6 @@ int main()
 	jj["key5"]=c;
 	jjj<<jj<<jj<<jj;
 	jj["array"]=jjj;
-	cout<<jj.serialization();
+	cout<<jj.serialization()<<endl;
 	return 0;
 }
