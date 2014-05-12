@@ -9,6 +9,10 @@ using namespace std;
 
 typedef double json_number;
 
+#define STRING_TRUE "true"
+#define STRING_FALSE "false"
+#define STRING_NULL "null"
+
 class jam_json
 {
 public:
@@ -73,23 +77,43 @@ public:
 	{
 		return this->add(o);
 	}
+	
+	operator bool()
+	{
+		return this->to_bool();
+	}
+
+	operator const char*()
+	{
+		return this->to_str();
+	}
+
+	operator json_number()
+	{
+		return this->to_number();
+	}
+
+	operator vector<char>()
+	{
+		return this->j_data;
+	}
 
 public:
-	const char* to_str()
+	const char* to_str() const
 	{
 		if(this->j_type != JSON_STRING)return NULL;
 		return this->j_data.data();
 	}
-	json_number to_number()
+	json_number to_number() const
 	{
 		if(this->j_type != JSON_NUMBER)return 0;
 		return *(json_number*)this->j_data.data();
 	}
-	bool to_bool()
+	bool to_bool() const
 	{
 		return this->j_type==JSON_TRUE;
 	}
-	const vector<char>& data()
+	const vector<char>& data() const
 	{
 		return this->j_data;
 	}
@@ -150,10 +174,6 @@ public:
 	//add object to itself
 	jam_json& add(const jam_json& o)
 	{
-		if(this==&o)
-		{
-			return *this;
-		}
 		if(this->j_type != JSON_ARRAY)
 		{
 			this->clear();
@@ -447,20 +467,20 @@ public:
 			else if(c=='t' || c=='T') //true
 			{
 					this->set_value(true);
-					char out[6]={0};
-					is.get(out,5);
+					char out[sizeof(STRING_TRUE)+1]={0};
+					is.get(out,sizeof(STRING_TRUE));
 			}
 			else if(c=='f' || c=='F') //false
 			{
 					this->set_value(false);
-					char out[7]={0};
-					is.get(out,6);
+					char out[sizeof(STRING_FALSE)+1]={0};
+					is.get(out,sizeof(STRING_FALSE));
 			}
 			else if(c=='n' || c=='N') //null
 			{
 					//this->clear();
-					char out[6]={0};
-					is.get(out,5);
+					char out[sizeof(STRING_NULL)+1]={0};
+					is.get(out,sizeof(STRING_NULL));
 			}
 			else if(c=='{') //object
 			{
@@ -550,3 +570,4 @@ private:
 	vector <jam_json> j_array; 
 	int j_type;
 };
+

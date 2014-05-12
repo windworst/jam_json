@@ -1,25 +1,40 @@
+#include "jam_json.h"
 #include <iostream>
 using namespace std;
-#include "jam_json.h"
 
 int main()
 {
-	jam_json jj;
-	jam_json jjj;
-	vector<char> c(20,'2');
-	jj["key1"]="value1";
-	jj["key2"]=1.0;
-	jj["key3"]=true;
-	jj["key4"]=false;
-	jj["key5"]=c;
-	jjj<<jj<<jj<<jj;
-	jj["array"]=jjj;
-	string str = jj.serialization();
-	cout<<str<<endl;
+	jam_json aa;
+	aa["string"] = "I'm a string";
+	aa["number"] = json_number(-123.456e-3);
+	aa["true"]	 = true;
+	aa["false"]	 = false;
+	aa["null"]   = jam_json();
+	aa["data"]   = vector<char>(20,'x');
 
-	jam_json rj = jam_json::unserialization(str);
-	cout<<rj.type()<<endl;
-	rj.serialization(cout)<<endl;
+	string jstr_aa = aa.serialization();
+
+	cout <<"aa json string: "<< jstr_aa <<endl<<endl;
+
+	cout <<"aa[\"number\"] :"<<(json_number)aa["number"]<<endl<<endl;
+
+	jam_json array;
+
+	array<<aa<<aa;
+
+	string jstr_array = array.serialization();
+
+	cout <<"array json string: "<<jstr_array <<endl<<endl;
+
+	array<<array<<array;
+
+	jstr_array = array.serialization();
+
+	cout <<"array-array json string: "<<jstr_array<<endl<<endl;
+
+	jam_json unseria = jam_json::unserialization(jstr_array);
+
+	cout<<"unserialization json-str: "<<unseria.serialization()<<endl<<endl;
 
 	return 0;
 }
