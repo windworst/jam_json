@@ -3,7 +3,7 @@ jam_json
 
 一个简单的json解释器
 
-除遵循json标准以外,还支持存放内存块  (使用 vector<char>存放)
+除遵循json标准以外,还支持存放内存块  (使用 vector<char>存放), 在json字符串中以 "key":b<length>"<blockdata>" 形式存放
 
 单个头文件,包含即可使用;
 
