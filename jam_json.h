@@ -33,21 +33,10 @@ public:
 	{
 		this->set_value(str,len);
 	}
-	jam_json(const vector<char>& j_data)
-	{
-		this->set_value(j_data);
-	}
-	jam_json(const jam_json& o)
+	template <typename T>
+	jam_json(const T& o)
 	{
 		this->set_value(o);
-	}
-	jam_json(json_number number)
-	{
-		this->set_value(number);
-	}
-	jam_json(bool bool_value)
-	{
-		this->set_value(bool_value);
 	}
 	
 	~jam_json()
@@ -56,21 +45,22 @@ public:
 
 public:
 	//operator
-	jam_json& operator=(const jam_json& o)
+	template <typename T>
+	jam_json& operator=(const T& o)
 	{
 		this->set_value(o);
 		return *this;
 	}
 
-	jam_json& operator[](const char* key)
+	template<typename T>
+	jam_json& operator[](const T& key)
 	{
-		this->j_type = JSON_OBJECT;
+		if(this->j_type != JSON_OBJECT)
+		{
+			this->clear();
+			this->j_type = JSON_OBJECT;
+		}
 		return this->key_value[key];
-	}
-
-	jam_json& operator[](int index)
-	{
-		return this->j_array.at(index);
 	}
 
 	jam_json& operator<<(const jam_json& o)
@@ -117,6 +107,7 @@ public:
 	{
 		return this->j_data;
 	}
+
 	//set value: string/null
 	void set_value(const void* str,int len = 0)
 	{
@@ -132,7 +123,11 @@ public:
 		memcpy(this->j_data.data(),str,len);
 		this->j_data[len] = '\0';
 	}
-
+	//set value: string
+	void set_value(const string& str)
+	{
+		this->set_value(str.data(),str.size());
+	}
 	//set value: number
 	void set_value(json_number number)
 	{
@@ -184,14 +179,15 @@ public:
 	}
 
 	//add key-value item
-	jam_json& add(const string& key,const jam_json& o)
+	template <typename T>
+	jam_json& add(const string& key,const T& o)
 	{
 		if(this->j_type != JSON_OBJECT)
 		{
 			this->clear();
 		}
 		this->j_type = JSON_OBJECT;
-		this->key_value[key] = o;
+		this->key_value[key].set_value(o);
 		return *this;
 	}
 	//map
@@ -211,6 +207,11 @@ public:
 			return this->key_value.size();
 		}
 		return 0;
+	}
+	//array
+	jam_json& array_at(int index)
+	{
+		return this->j_array.at(index);
 	}
 
 	//clean
