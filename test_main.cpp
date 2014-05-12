@@ -14,6 +14,12 @@ int main()
 	jj["key5"]=c;
 	jjj<<jj<<jj<<jj;
 	jj["array"]=jjj;
-	cout<<jj.serialization()<<endl;
+	string str = jj.serialization();
+	cout<<str<<endl;
+
+	jam_json rj = jam_json::unserialization(str);
+	cout<<rj.type()<<endl;
+	rj.serialization(cout)<<endl;
+
 	return 0;
 }

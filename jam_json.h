@@ -96,9 +96,9 @@ public:
 	//set value: string/null
 	void set_value(const void* str,int len = 0)
 	{
+		this->clear();
 		if(str==NULL)
 		{
-			this->j_type = JSON_NULL;
 			return;
 		}
 
@@ -112,6 +112,7 @@ public:
 	//set value: number
 	void set_value(json_number number)
 	{
+		this->clear();
 		this->j_type = JSON_NUMBER;
 		this->j_data.resize(sizeof(json_number));
 		(*(json_number*)this->j_data.data()) = number;
@@ -120,6 +121,7 @@ public:
 	//set value: j_data
 	void set_value(const vector<char>& j_data)
 	{
+		this->clear();
 		this->j_type = JSON_BYTES;
 		this->j_data = j_data;
 	}
@@ -127,7 +129,10 @@ public:
 	//set value: object
 	void set_value(const jam_json& o)
 	{
-		if(this==&o)return;
+		if(this==&o)
+		{
+			return;
+		}
 
 		this->j_type = o.j_type;
 		this->j_data = o.j_data;
@@ -138,12 +143,21 @@ public:
 	//set value: 
 	void set_value(bool bool_value)
 	{
+		this->clear();
 		this->j_type = bool_value ? JSON_TRUE : JSON_FALSE;
 	}
 
 	//add object to itself
 	jam_json& add(const jam_json& o)
 	{
+		if(this==&o)
+		{
+			return *this;
+		}
+		if(this->j_type != JSON_ARRAY)
+		{
+			this->clear();
+		}
 		this->j_type = JSON_ARRAY;
 		this->j_array.push_back(o);
 		return *this;
@@ -152,6 +166,10 @@ public:
 	//add key-value item
 	jam_json& add(const string& key,const jam_json& o)
 	{
+		if(this->j_type != JSON_OBJECT)
+		{
+			this->clear();
+		}
 		this->j_type = JSON_OBJECT;
 		this->key_value[key] = o;
 		return *this;
@@ -211,6 +229,11 @@ public:
 		return jj;
 	}
 
+	static jam_json unserialization(const string& str)
+	{
+		return unserialization(str.data(),str.size());
+	}
+
 	//string to json-string
 	ostream& json_escape(ostream &os,const char* str,int len)
 	{
@@ -231,7 +254,7 @@ public:
 			{
 				os<<"\\u"<<setw(4)<<setfill('0')
 					<<setiosflags(ios::right)<<hex 
-					<<*(short*)(str+i);
+					<<*(unsigned short*)(str+i);
 				++i;
 			}
 			else
@@ -246,7 +269,7 @@ public:
 					default:
 							   os<<"\\x"<<setw(2)<<setfill('0')
 								   <<setiosflags(ios::right)<<hex 
-								   <<(int)str[i];
+								   <<(unsigned short)str[i];
 							   break;
 				}
 			}
@@ -256,192 +279,269 @@ public:
 	//json-string to string
 	istream& json_unescape(istream &is)
 	{
-		//TODO
+		this->clear();
+		this->j_type = JSON_STRING;
+		int c = is.peek();
+		if(c=='"')
+		{
+			c = is.get();
+		}
+		bool escape_flag = false;
+		while(c=is.peek(),c!=-1 && c!='"' )
+		{
+			if(escape_flag)
+			{
+				switch(c)
+				{
+						case '"':	this->j_data.push_back('"');break;
+						case '/': 	this->j_data.push_back('/');break;
+						case '\\': 	this->j_data.push_back('\\');break;
+						case 'b': 	this->j_data.push_back('\b');break;
+						case 't':	this->j_data.push_back('\t');break;
+						case 'r':	this->j_data.push_back('\r');break;
+						case 'n':	this->j_data.push_back('\n');break;
+						case 'f':	this->j_data.push_back('\f');break;
+						case 'x':	
+									{
+											unsigned short num;
+											char num_str[3]={0};
+											stringstream ss;
+											if(is.get(num_str,2) && ss<<num_str && ss>>num)
+											{
+													this->j_data.push_back((unsigned char)num);
+											}
+									}
+									break;
+						case 'u':
+									{
+											unsigned short num;
+											char num_str[5]={0};
+											stringstream ss;
+											if(is.get(num_str,4) && ss<<num_str && ss>>num)
+											{
+													this->j_data.push_back( ((unsigned char*)&num)[0] );
+													this->j_data.push_back( ((unsigned char*)&num)[1] );
+											}
+									}
+									break;
+						default:	this->j_data.push_back(c);break;
+				}
+				escape_flag = false;
+			}
+			else
+			{
+				if(c=='\\')
+				{
+					escape_flag = true;
+				}
+				else
+				{
+					this->j_data.push_back(c);
+				}
+			}
+			c = is.get();
+		}
+		if(c=='"')
+		{
+			c = is.get();
+		}
+		if(is)
+		{
+			this->j_data.push_back('\0');
+		}
 		return is;
 	}
 
 
 	ostream& serialization(ostream &os)
 	{
-		switch(this->j_type)
-		{
-			case JSON_NULL: 
-				os<< "NULL";
-				break;
+			switch(this->j_type)
+			{
+					case JSON_NULL: 
+							os<< "null";
+							break;
 
-			case JSON_TRUE: 
-				os<< "true";
-				break;
+					case JSON_TRUE: 
+							os<< "true";
+							break;
 
-			case JSON_FALSE: 
-				os<< "false";
-				break;
+					case JSON_FALSE: 
+							os<< "false";
+							break;
 
-			case JSON_NUMBER:
-				os<<(*(json_number*)this->j_data.data());
-				break;
+					case JSON_NUMBER:
+							os<<(*(json_number*)this->j_data.data());
+							break;
 
-			case JSON_STRING:
-				os<<"\"";
-				this->json_escape(os,this->j_data.data(),this->j_data.size()-1);
-				os<<"\"";
-				break;
+					case JSON_STRING:
+							os<<"\"";
+							this->json_escape(os,this->j_data.data(),this->j_data.size()-1);
+							os<<"\"";
+							break;
 
-			case JSON_OBJECT:
-				{
-					map<string,jam_json>::iterator it =this->key_value.begin();
-					os<<"{";
-					while(it!=this->key_value.end())
-					{
-						if(it!=this->key_value.begin())
-						{
-							os<<",";
-						}
+					case JSON_OBJECT:
+							{
+									map<string,jam_json>::iterator it =this->key_value.begin();
+									os<<"{";
+									while(it!=this->key_value.end())
+									{
+											if(it!=this->key_value.begin())
+											{
+													os<<",";
+											}
 
-						os<<"\""<<it->first<<"\":";
-						it->second.serialization(os);
-						++it;
-					}
-					os<<"}";
-				}
-				break;
-			case JSON_ARRAY:
-				{
-					vector <jam_json>::iterator it = this->j_array.begin();
-					os<<"[";
-					while(it!=this->j_array.end())
-					{
-						if(it!=this->j_array.begin())
-						{
-							os<<",";
-						}
+											os<<"\""<<it->first<<"\":";
+											it->second.serialization(os);
+											++it;
+									}
+									os<<"}";
+							}
+							break;
+					case JSON_ARRAY:
+							{
+									vector <jam_json>::iterator it = this->j_array.begin();
+									os<<"[";
+									while(it!=this->j_array.end())
+									{
+											if(it!=this->j_array.begin())
+											{
+													os<<",";
+											}
 
-						it->serialization(os);
-						++it;
-					}
-					os<<"]";
-				}
-				break;
-			case JSON_BYTES:
-				{
-					os<<"b"<<this->j_data.size()<<"\"";
-					os.write(this->j_data.data(),this->j_data.size());
-					os<<"\"";
-				}
-				break;
-			default:break;
-		}
-		return os;
+											it->serialization(os);
+											++it;
+									}
+									os<<"]";
+							}
+							break;
+					case JSON_BYTES:
+							{
+									os<<"b"<<this->j_data.size()<<"\"";
+									os.write(this->j_data.data(),this->j_data.size());
+									os<<"\"";
+							}
+							break;
+					default:break;
+			}
+			return os;
 	}
 
 	istream& unserialization(istream& is)
 	{
-		this->clear();
-		//get no-space
-		int c = -1;
-		while(c = is.peek(),c==' ')
-		{
-				c = is.get();
-		}
-		if(c==-1) 
-		{
+			this->clear();
+			//get no-space
+			int c = -1;
+			while(c = is.peek(),c==' '&&c!=-1)
+			{
+					c = is.get();
+			}
+			if(c==-1) 
+			{
+					return is;
+			}
+			
+			if(c=='"') //string
+			{
+					this->json_unescape(is);
+			}
+			else if(c=='t' || c=='T') //true
+			{
+					this->set_value(true);
+					char out[6]={0};
+					is.get(out,5);
+			}
+			else if(c=='f' || c=='F') //false
+			{
+					this->set_value(false);
+					char out[7]={0};
+					is.get(out,6);
+			}
+			else if(c=='n' || c=='N') //null
+			{
+					//this->clear();
+					char out[6]={0};
+					is.get(out,5);
+			}
+			else if(c=='{') //object
+			{
+					c = is.get();
+					while(true)
+					{
+							string key;
+							while(c = is.peek(),c==' '||c==',')
+							{
+									c = is.get();
+							}
+							if(c == -1 || c == '}')
+							{
+									c = is.get(); // '}'
+									break;
+							}
+							c = is.get(); // '"'
+							getline(is,key,'"');
+							c = is.get(); // ':'
+							
+							jam_json value;
+							if(value.unserialization(is))
+							{
+									this->add(key,value);
+							}
+							else
+							{
+									break;
+							}
+					}
+			}
+			else if(c=='[') //array
+			{
+					c = is.get();
+					while(true)
+					{
+							while(c = is.peek(),c==' '||c==',')
+							{
+									c = is.get();
+							}
+							if(c == -1 || c == ']')
+							{
+									c = is.get(); // ']'
+									break;
+							}
+
+							jam_json value;
+							if(value.unserialization(is))
+							{
+									this->add(value);
+							}
+							else
+							{
+									break;
+							}
+					}
+
+			}
+			else if(c=='b') //byte
+			{
+					c = is.get(); //'b'
+					int len = 0;
+					if(is>>len)
+					{
+							this->j_data.resize(len);
+							c = is.get(); //'"'
+							is.read(this->j_data.data(),len);
+							c = is.get(); //'"'
+							this->j_type = is ? JSON_BYTES : JSON_NULL;
+					}
+			}
+			else
+			{
+					json_number jn;
+					if(is>>jn)
+					{
+							this->set_value(jn);
+					}
+			}
+
 			return is;
-		}
-
-		if(c=='"') //string
-		{
-				this->json_unescape(is);
-		}
-		else if(c=='t') //true
-		{
-				this->set_value(true);
-		}
-		else if(c=='f') //false
-		{
-				this->set_value(false);
-		}
-		else if(c=='n') //null
-		{
-				//this->clear();
-		}
-		else if(c=='{') //object
-		{
-				c = is.get();
-				while(true)
-				{
-					string key;
-					while(c = is.peek(),c==' '||c==',')
-					{
-							c = is.get();
-					}
-					if(c == -1 || c == '}')
-					{
-						break;
-					}
-					c = is.get(); // '"'
-					getline(is,key,'"');
-					c = is.get(); // ':'
-
-					jam_json value;
-					if(value.unserialization(is))
-					{
-						this->add(key,value);
-					}
-					else
-					{
-						break;
-					}
-				}
-		}
-		else if(c=='[') //array
-		{
-				c = is.get();
-				while(true)
-				{
-					while(c = is.peek(),c==' '||c==',')
-					{
-							c = is.get();
-					}
-					if(c == -1 || c == ']')
-					{
-						break;
-					}
-
-					jam_json value;
-					if(value.unserialization(is))
-					{
-						this->add(value);
-					}
-					else
-					{
-						break;
-					}
-				}
-
-		}
-		else if(c=='b') //byte
-		{
-				c = is.get(); //'b'
-				int len = 0;
-				if(is>>len)
-				{
-						this->j_data.resize(len);
-						c = is.get(); //'"'
-						is.read(this->j_data.data(),len);
-						c = is.get(); //'"'
-						this->j_type = is ? JSON_BYTES : JSON_NULL;
-				}
-		}
-		else
-		{
-				json_number jn;
-				if(is>>jn)
-				{
-						this->set_value(jn);
-				}
-		}
-
-		return is;
 	}
 
 private:
