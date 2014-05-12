@@ -209,7 +209,7 @@ public:
 		return 0;
 	}
 	//array
-	jam_json& array_at(int index)
+	jam_json& operator[](int index)
 	{
 		return this->j_array.at(index);
 	}
