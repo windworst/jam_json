@@ -1,6 +1,7 @@
-#include "jam_json.h"
 #include <iostream>
 using namespace std;
+#include <stdlib.h>
+#include "jam_json.h"
 
 int main()
 {
@@ -35,6 +36,11 @@ int main()
 	jam_json unseria = jam_json::unserialization(jstr_array);
 
 	cout<<"unserialization json-str: "<<unseria.serialization()<<endl<<endl;
+
+	jam_json jjs = jam_json::unserialization("\"月上柳梢头，人约黄昏后\"");
+
+	cout<<jjs.serialization()<<endl;
+	cout<<jjs.to_str()<<endl;
 
 	return 0;
 }

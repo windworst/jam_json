@@ -13,6 +13,12 @@ typedef double json_number;
 #define STRING_FALSE "false"
 #define STRING_NULL "null"
 
+bool is_big_endian()
+{
+	unsigned short a = 0X1100;
+	return ((unsigned char*)&a)[0] == 0X11;
+}
+
 class jam_json
 {
 public:
@@ -273,9 +279,16 @@ public:
 			}
 			else if( ((unsigned char)str[i])>=0X80)
 			{
+				unsigned short num = *(unsigned short*)(str+i);
+				if(!::is_big_endian())
+				{
+					unsigned char* p_num = (unsigned char*)&num;
+					p_num[0]^=p_num[1]^=p_num[0]^=p_num[1];
+				}
+
 				os<<"\\u"<<setw(4)<<setfill('0')
 					<<setiosflags(ios::right)<<hex 
-					<<*(unsigned short*)(str+i);
+					<<num;
 				++i;
 			}
 			else
@@ -301,14 +314,13 @@ public:
 	istream& json_unescape(istream &is)
 	{
 		this->clear();
-		this->j_type = JSON_STRING;
-		int c = is.peek();
+		int c = is.get();
 		if(c=='"')
 		{
 			c = is.get();
 		}
 		bool escape_flag = false;
-		while(c=is.peek(),c!=-1 && c!='"' )
+		while(c!=-1 && c!='"' )
 		{
 			if(escape_flag)
 			{
@@ -325,9 +337,9 @@ public:
 						case 'x':	
 									{
 											unsigned short num;
-											char num_str[3]={0};
+											char num_str[4]={0};
 											stringstream ss;
-											if(is.get(num_str,2) && ss<<num_str && ss>>num)
+											if(is.get(num_str,3) && ss<<num_str && ss>>num)
 											{
 													this->j_data.push_back((unsigned char)num);
 											}
@@ -336,12 +348,13 @@ public:
 						case 'u':
 									{
 											unsigned short num;
-											char num_str[5]={0};
+											char num_str[6]={0};
 											stringstream ss;
-											if(is.get(num_str,4) && ss<<num_str && ss>>num)
+											if(is.get(num_str,5) && ss<<num_str && ss>>num)
 											{
-													this->j_data.push_back( ((unsigned char*)&num)[0] );
-													this->j_data.push_back( ((unsigned char*)&num)[1] );
+													bool be = ::is_big_endian();
+													this->j_data.push_back( ((unsigned char*)&num)[!be] );
+													this->j_data.push_back( ((unsigned char*)&num)[be] );
 											}
 									}
 									break;
@@ -362,13 +375,10 @@ public:
 			}
 			c = is.get();
 		}
-		if(c=='"')
-		{
-			c = is.get();
-		}
 		if(is)
 		{
 			this->j_data.push_back('\0');
+			this->j_type = JSON_STRING;
 		}
 		return is;
 	}
