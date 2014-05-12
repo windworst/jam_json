@@ -62,6 +62,11 @@ public:
 		}
 		return this->key_value[key];
 	}
+	
+	jam_json& operator[](int index)
+	{
+		return this->j_array.at(index);
+	}
 
 	jam_json& operator<<(const jam_json& o)
 	{
@@ -208,12 +213,7 @@ public:
 		}
 		return 0;
 	}
-	//array
-	jam_json& operator[](int index)
-	{
-		return this->j_array.at(index);
-	}
-
+	
 	//clean
 	void clear()
 	{
