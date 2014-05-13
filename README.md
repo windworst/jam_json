@@ -12,6 +12,6 @@ a添加数组成员: a<<b<<c<<"string"<<json_number(123456);
 
 取出值: (json_number)a["number"], (const char*)a["string"],(vector<char>)a["memory"];
 
-序列化: string s = a.serialization();
-反序列化 jam_json out = jam_json::unserialization(s);
+序列化: string s = a.to_json();
+反序列化 jam_json out = jam_json::from_json(s);
 

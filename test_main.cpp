@@ -13,7 +13,7 @@ int main()
 	aa["null"]   = jam_json();
 	aa["data"]   = vector<char>(20,'x');
 
-	string jstr_aa = aa.serialization();
+	string jstr_aa = aa.to_json();
 
 	cout <<"aa json string: "<< jstr_aa <<endl<<endl;
 
@@ -23,23 +23,23 @@ int main()
 
 	array<<aa<<aa;
 
-	string jstr_array = array.serialization();
+	string jstr_array = array.to_json();
 
 	cout <<"array json string: "<<jstr_array <<endl<<endl;
 
 	array<<array<<array;
 
-	jstr_array = array.serialization();
+	jstr_array = array.to_json();
 
 	cout <<"array--array json string: "<<jstr_array<<endl<<endl;
 
-	jam_json unseria = jam_json::unserialization(jstr_array);
+	jam_json unseria = jam_json::from_json(jstr_array);
 
-	cout<<"unserialization json-str: "<<unseria.serialization()<<endl<<endl;
+	cout<<"unserialization json-str: "<<unseria.to_json()<<endl<<endl;
 
-	jam_json jjs = jam_json::unserialization("\"月上柳梢头，人约黄昏后\"");
+	jam_json jjs = jam_json::from_json("\"月上柳梢头，人约黄昏后\"");
 
-	cout<<jjs.serialization()<<endl;
+	cout<<jjs.to_json()<<endl;
 	cout<<jjs.to_str()<<endl;
 
 	return 0;

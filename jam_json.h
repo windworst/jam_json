@@ -230,29 +230,29 @@ class jam_json
 		}
 
 		//serialization
-		string serialization()
+		string to_json()
 		{
 			stringstream ss;
-			this->serialization(ss);
+			this->to_json(ss);
 			return ss.str();
 		}
 
 		//unserialization
-		static jam_json unserialization(const char* str,int len = 0 )
+		static jam_json from_json(const char* str,int len = 0 )
 		{
 			stringstream ss;
 			jam_json jj;
 			if(str!=NULL)
 			{
 				ss.write(str,len==0?strlen(str):len);
-				jj.unserialization(ss);
+				jj.from_json(ss);
 			}
 			return jj;
 		}
 
-		static jam_json unserialization(const string& str)
+		static jam_json from_json(const string& str)
 		{
-			return unserialization(str.data(),str.size());
+			return from_json(str.data(),str.size());
 		}
 
 		//string to json-string
@@ -380,7 +380,7 @@ class jam_json
 		}
 
 
-		ostream& serialization(ostream &os)
+		ostream& to_json(ostream &os)
 		{
 			switch(this->j_type)
 			{
@@ -418,7 +418,7 @@ class jam_json
 							}
 
 							os<<"\""<<it->first<<"\":";
-							it->second.serialization(os);
+							it->second.to_json(os);
 							++it;
 						}
 						os<<"}";
@@ -435,7 +435,7 @@ class jam_json
 								os<<",";
 							}
 
-							it->serialization(os);
+							it->to_json(os);
 							++it;
 						}
 						os<<"]";
@@ -453,7 +453,7 @@ class jam_json
 			return os;
 		}
 
-		istream& unserialization(istream& is)
+		istream& from_json(istream& is)
 		{
 			this->clear();
 			//get no-space
@@ -502,7 +502,7 @@ class jam_json
 					c = is.get(); // ':'
 
 					jam_json value;
-					if(value.unserialization(is))
+					if(value.from_json(is))
 					{
 						this->add(key,value);
 					}
@@ -525,7 +525,7 @@ class jam_json
 					}
 
 					jam_json value;
-					if(value.unserialization(is))
+					if(value.from_json(is))
 					{
 						this->add(value);
 					}
