@@ -300,6 +300,7 @@ public:
 			case '\f': os<<"\\f";break;
 			case '\n': os<<"\\n";break;
 			case '\r': os<<"\\r";break;
+			case  127:
 			default:
 				   os<<"\\x"<<setw(2)<<setfill('0')
 				   <<setiosflags(ios::right)<<hex 
@@ -461,11 +462,7 @@ public:
 	{
 		this->clear();
 		//get no-space
-		int c = -1;
-		while(c = is.peek(),c==' '&&c!=-1)
-		{
-			c = is.get();
-		}
+		int c = jump_space(is);
 		if(c==-1) 
 		{
 			return is;
@@ -499,10 +496,7 @@ public:
 			while(true)
 			{
 				string key;
-				while(c = is.peek(),c==' '||c==',')
-				{
-					c = is.get();
-				}
+				c = jump_space(is);
 				if(c == -1 || c == '}')
 				{
 					c = is.get(); // '}'
@@ -528,10 +522,7 @@ public:
 			c = is.get();
 			while(true)
 			{
-				while(c = is.peek(),c==' '||c==',')
-				{
-					c = is.get();
-				}
+				c = jump_space(is);
 				if(c == -1 || c == ']')
 				{
 					c = is.get(); // ']'
@@ -574,7 +565,16 @@ public:
 
 		return is;
 	}
-
+protected:
+	int jump_space(istream& is)
+	{
+		int c = -1;
+		while(c=is.peek(), c!=-1 && (c<=' '||c>=127||c==',') )
+		{
+			c = is.get();
+		}
+		return c;
+	}
 private:
 	map<string,jam_json> key_value;
 	vector <char> j_data;

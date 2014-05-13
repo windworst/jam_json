@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 using namespace std;
 #include <stdlib.h>
 #include "jam_json.h"
@@ -31,7 +31,7 @@ int main()
 
 	jstr_array = array.serialization();
 
-	cout <<"array-array json string: "<<jstr_array<<endl<<endl;
+	cout <<"array--array json string: "<<jstr_array<<endl<<endl;
 
 	jam_json unseria = jam_json::unserialization(jstr_array);
 
