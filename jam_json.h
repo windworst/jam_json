@@ -13,12 +13,6 @@ typedef double json_number;
 #define STRING_FALSE "false"
 #define STRING_NULL "null"
 
-bool is_big_endian()
-{
-	unsigned short a = 0X1100;
-	return ((unsigned char*)&a)[0] == 0X11;
-}
-
 class jam_json
 {
 	public:
@@ -280,12 +274,6 @@ class jam_json
 				else if( ((unsigned char)str[i])>=0X80)
 				{
 					unsigned short num = *(unsigned short*)(str+i);
-					if(!::is_big_endian())
-					{
-						unsigned char* p_num = (unsigned char*)&num;
-						p_num[0]^=p_num[1]^=p_num[0]^=p_num[1];
-					}
-
 					os<<"\\u"<<setw(4)<<setfill('0')
 						<<setiosflags(ios::right)<<hex 
 						<<num;
@@ -361,9 +349,8 @@ class jam_json
 								stringstream ss;
 								if(is.get(num_str,5) && ss<<num_str && ss>>num)
 								{
-									bool be = ::is_big_endian();
-									this->j_data.push_back( ((unsigned char*)&num)[!be] );
-									this->j_data.push_back( ((unsigned char*)&num)[be] );
+									this->j_data.push_back( ((unsigned char*)&num)[0] );
+									this->j_data.push_back( ((unsigned char*)&num)[1] );
 								}
 							}
 							break;
