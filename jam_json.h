@@ -327,38 +327,46 @@ class jam_json
 				{
 					switch(c)
 					{
-						case '"':	this->j_data.push_back('"');break;
-						case '/': 	this->j_data.push_back('/');break;
-						case '\\': 	this->j_data.push_back('\\');break;
-						case 'b': 	this->j_data.push_back('\b');break;
-						case 't':	this->j_data.push_back('\t');break;
-						case 'r':	this->j_data.push_back('\r');break;
-						case 'n':	this->j_data.push_back('\n');break;
-						case 'f':	this->j_data.push_back('\f');break;
-						case 'x':	
-									{
-										unsigned short num;
-										char num_str[4]={0};
-										stringstream ss;
-										if(is.get(num_str,3) && ss<<num_str && ss>>num)
-										{
-											this->j_data.push_back((unsigned char)num);
-										}
-									}
-									break;
+						case '"':	
+							this->j_data.push_back('"');break;
+						case '/': 	
+							this->j_data.push_back('/');break;
+						case '\\': 	
+							this->j_data.push_back('\\');break;
+						case 'b': 	
+							this->j_data.push_back('\b');break;
+						case 't':	
+							this->j_data.push_back('\t');break;
+						case 'r':	
+							this->j_data.push_back('\r');break;
+						case 'n':	
+							this->j_data.push_back('\n');break;
+						case 'f':	
+							this->j_data.push_back('\f');break;
+						case 'x':
+							{
+								unsigned short num;
+								char num_str[4]={0};
+								stringstream ss;
+								if(is.get(num_str,3) && ss<<num_str && ss>>num)
+								{
+									this->j_data.push_back((unsigned char)num);
+								}
+							}
+							break;
 						case 'u':
-									{
-										unsigned short num;
-										char num_str[6]={0};
-										stringstream ss;
-										if(is.get(num_str,5) && ss<<num_str && ss>>num)
-										{
-											bool be = ::is_big_endian();
-											this->j_data.push_back( ((unsigned char*)&num)[!be] );
-											this->j_data.push_back( ((unsigned char*)&num)[be] );
-										}
-									}
-									break;
+							{
+								unsigned short num;
+								char num_str[6]={0};
+								stringstream ss;
+								if(is.get(num_str,5) && ss<<num_str && ss>>num)
+								{
+									bool be = ::is_big_endian();
+									this->j_data.push_back( ((unsigned char*)&num)[!be] );
+									this->j_data.push_back( ((unsigned char*)&num)[be] );
+								}
+							}
+							break;
 						default:	this->j_data.push_back(c);break;
 					}
 					escape_flag = false;
