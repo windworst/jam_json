@@ -449,7 +449,7 @@ class jam_json
 					break;
 				case JSON_BYTES:
 					{
-						os<<"b"<<this->j_data.size()<<":";
+						os<<"&"<<this->j_data.size()<<":";
 						os.write(this->j_data.data(),this->j_data.size());
 					}
 					break;
@@ -542,9 +542,9 @@ class jam_json
 				}
 
 			}
-			else if(c=='b') //byte
+			else if(c=='&') //byte
 			{
-				c = is.get(); //'b'
+				c = is.get(); //'&'
 				int len = 0;
 				if(is>>len)
 				{
