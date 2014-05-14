@@ -1,17 +1,19 @@
-jam_json
+jam json
 ========
 
-一个简单的json解释器
+一个轻量级json解释器 (单个头文件,包含即可使用)
 
-除遵循json标准以外,还支持存放内存块  (使用 vector<char>存放), 在json字符串中以 "key":b[length]"[blockdata]" 形式存放
+除遵循json标准以外,还支持存放内存块
 
-单个头文件,包含即可使用;
 
-a添加键值对: a["key"] = "value", a["number"]=123.456, a["block"] = vector<char>(100,'x');
-a添加数组成员: a<<b<<c<<"string"<<json_number(123456);
+接口
+operator<<:			作为数组添加元素
+	a<<"123"<<456<<true<<false;
+operator[int]:		作为数组访问下标
+	a[0].to_string()=="123"
+operator[string]:	键值对操作
+	a["key"] = "value";
 
-取出值: (json_number)a["number"], (const char*)a["string"],(vector<char>)a["memory"];
+string to_json(): 将json对象转换为json字符串
 
-序列化: string s = a.to_json();
-反序列化 jam_json out = jam_json::from_json(s);
-
+from_json(string): 从json字符串来实例化json对象

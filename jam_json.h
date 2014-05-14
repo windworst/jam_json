@@ -7,7 +7,9 @@
 #include <sstream>
 using namespace std;
 
-typedef double json_number;
+#ifndef json_number
+#define json_number double
+#endif
 
 #define STRING_TRUE "true"
 #define STRING_FALSE "false"
@@ -111,6 +113,10 @@ class jam_json
 		const vector<char>& data() const
 		{
 			return this->j_data;
+		}
+		string	to_string()
+		{
+			return string(this->j_data.data(),this->j_data.size());
 		}
 
 		//set value: string/null
@@ -443,9 +449,8 @@ class jam_json
 					break;
 				case JSON_BYTES:
 					{
-						os<<"b"<<this->j_data.size()<<"\"";
+						os<<"b"<<this->j_data.size()<<":";
 						os.write(this->j_data.data(),this->j_data.size());
-						os<<"\"";
 					}
 					break;
 				default:break;
@@ -543,9 +548,8 @@ class jam_json
 				if(is>>len)
 				{
 					this->j_data.resize(len);
-					c = is.get(); //'"'
+					c = is.get(); //':'
 					is.read(this->j_data.data(),len);
-					c = is.get(); //'"'
 					this->j_type = is ? JSON_BYTES : JSON_NULL;
 				}
 			}
