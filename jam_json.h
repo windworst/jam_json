@@ -472,19 +472,19 @@ class jam_json
 			{
 				this->json_unescape(is);
 			}
-			else if(c=='t' || c=='T') //true
+			else if(c=='t') //true
 			{
 				this->set_value(true);
 				char out[sizeof(STRING_TRUE)+1]={0};
 				is.get(out,sizeof(STRING_TRUE));
 			}
-			else if(c=='f' || c=='F') //false
+			else if(c=='f') //false
 			{
 				this->set_value(false);
 				char out[sizeof(STRING_FALSE)+1]={0};
 				is.get(out,sizeof(STRING_FALSE));
 			}
-			else if(c=='n' || c=='N') //null
+			else if(c=='n') //null
 			{
 				//this->clear();
 				char out[sizeof(STRING_NULL)+1]={0};
@@ -504,6 +504,7 @@ class jam_json
 					}
 					c = is.get(); // '"'
 					getline(is,key,'"');
+					c = jump_space(is);
 					c = is.get(); // ':'
 
 					jam_json value;
