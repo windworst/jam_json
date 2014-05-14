@@ -22,7 +22,18 @@ operator[string]:	键值对操作
 
 
 
-string to_json(): 将json对象转换为json字符串
+to_json(): 将json对象转换为json字符串
+	
+	string str = a.to_json();
 
+to_json(ostream&): 将json字符串输出到流
+
+	a.to_json(cout);
 
 from_json(string): 从json字符串来实例化json对象
+	
+	jam_json a = jam_json::from_json(json_str);
+
+from_json(istream&): 从输入流实例化json对象
+	
+	a.from_json(cin);
