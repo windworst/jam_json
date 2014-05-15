@@ -350,9 +350,9 @@ class jam_json
 						case 'x':
 							{
 								unsigned short num;
-								char num_str[4]={0};
+								char num_str[3]={0};
 								stringstream ss;
-								if(is.get(num_str,3) && ss<<num_str && ss>>num)
+								if(is.read(num_str,2) && ss<<num_str && ss>>num)
 								{
 									this->j_data.push_back((unsigned char)num);
 								}
@@ -361,9 +361,9 @@ class jam_json
 						case 'u':
 							{
 								unsigned short num;
-								char num_str[6]={0};
+								char num_str[5]={0};
 								stringstream ss;
-								if(is.get(num_str,5) && ss<<num_str && ss>>num)
+								if(is.read(num_str,4) && ss<<num_str && ss>>num)
 								{
 									this->j_data.push_back( ((unsigned char*)&num)[0] );
 									this->j_data.push_back( ((unsigned char*)&num)[1] );
@@ -485,20 +485,20 @@ class jam_json
 			else if(c=='t') //true
 			{
 				this->set_value(true);
-				char out[sizeof(STRING_TRUE)+1]={0};
-				is.get(out,sizeof(STRING_TRUE));
+				char out[sizeof(STRING_TRUE)]={0};
+				is.read(out,sizeof(STRING_TRUE)-1);
 			}
 			else if(c=='f') //false
 			{
 				this->set_value(false);
-				char out[sizeof(STRING_FALSE)+1]={0};
-				is.get(out,sizeof(STRING_FALSE));
+				char out[sizeof(STRING_FALSE)]={0};
+				is.read(out,sizeof(STRING_FALSE)-1);
 			}
 			else if(c=='n') //null
 			{
 				//this->clear();
-				char out[sizeof(STRING_NULL)+1]={0};
-				is.get(out,sizeof(STRING_NULL));
+				char out[sizeof(STRING_NULL)]={0};
+				is.read(out,sizeof(STRING_NULL)-1);
 			}
 			else if(c=='{') //object
 			{
