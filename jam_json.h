@@ -182,7 +182,9 @@ class jam_json
 		{
 			if(this->j_type != JSON_ARRAY)
 			{
+				jam_json tmp(*this);
 				this->clear();
+				this->j_array.push_back(tmp);
 			}
 			this->j_type = JSON_ARRAY;
 			this->j_array.push_back(o);
@@ -198,7 +200,14 @@ class jam_json
 					this->clear();
 				}
 				this->j_type = JSON_OBJECT;
-				this->key_value[key].set_value(o);
+				if(this->key_value.find(key)!=this->key_value.end())
+				{
+					this->key_value[key].add(o);
+				}
+				else
+				{
+					this->key_value[key].set_value(o);
+				}
 				return *this;
 			}
 		//map
