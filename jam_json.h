@@ -513,7 +513,7 @@ class jam_json
 						break;
 					}
 					c = is.get(); // '"'
-					getline(is,key,c);
+					getline(is,key,(char)c);
 					c = jump_space(is);
 					c = is.get(); // ':'
 
