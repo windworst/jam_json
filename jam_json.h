@@ -200,9 +200,10 @@ class jam_json
 					this->clear();
 				}
 				this->j_type = JSON_OBJECT;
-				if(this->key_value.find(key)!=this->key_value.end())
+				map<string,jam_json>::iterator it = this->key_value.find(key);
+				if(it!=this->key_value.end())
 				{
-					this->key_value[key].add(o);
+					it->second.add(o);
 				}
 				else
 				{
