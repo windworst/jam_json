@@ -185,8 +185,8 @@ class jam_json
 				jam_json tmp(*this);
 				this->clear();
 				this->j_array.push_back(tmp);
-			}
-			this->j_type = JSON_ARRAY;
+				this->j_type = JSON_ARRAY;
+			}	
 			this->j_array.push_back(o);
 			return *this;
 		}
@@ -198,8 +198,8 @@ class jam_json
 				if(this->j_type != JSON_OBJECT)
 				{
 					this->clear();
+					this->j_type = JSON_OBJECT;
 				}
-				this->j_type = JSON_OBJECT;
 				map<string,jam_json>::iterator it = this->key_value.find(key);
 				if(it!=this->key_value.end())
 				{
