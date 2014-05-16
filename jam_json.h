@@ -180,13 +180,13 @@ class jam_json
 		//add object to itself
 		jam_json& add(const jam_json& o)
 		{
-			if(this->j_type != JSON_ARRAY)
+			if(this->j_type != JSON_ARRAY && this->j_type!= JSON_NULL)
 			{
 				jam_json tmp(*this);
 				this->clear();
 				this->j_array.push_back(tmp);
-				this->j_type = JSON_ARRAY;
-			}	
+			}
+			this->j_type = JSON_ARRAY;
 			this->j_array.push_back(o);
 			return *this;
 		}
