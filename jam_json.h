@@ -116,7 +116,8 @@ class jam_json
 		}
 		string	to_string()
 		{
-			return string(this->j_data.data(),this->j_data.size());
+			if(this->j_type != JSON_STRING)return srring();
+			return string(this->j_data.data(),this->j_data.size()-1);
 		}
 
 		//set value: string/null
