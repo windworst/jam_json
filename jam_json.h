@@ -326,7 +326,7 @@ class jam_json
 				c = is.get();
 			}
 			bool escape_flag = false;
-			while(c!=-1 && c!='"' )
+			while(c!=-1)
 			{
 				if(escape_flag)
 				{
@@ -377,7 +377,11 @@ class jam_json
 				}
 				else
 				{
-					if(c=='\\')
+					if(c=='"')
+					{
+						break;
+					}
+					else if(c=='\\')
 					{
 						escape_flag = true;
 					}
